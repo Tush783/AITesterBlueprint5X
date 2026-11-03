@@ -1,0 +1,2 @@
+Short Summary:
+I'm working right now on vwo.com, which is a Wingify product. Here, we do A/B testing, and the overall company basically performs A/B testing for the website. Our task mostly is that you are basically present. This company has 5,000 employees. Our main target is to do A/B testing, provide certain features, and everything in detail. 
