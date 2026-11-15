@@ -8,7 +8,7 @@
 
 <br/>
 
-[![Chapters](https://img.shields.io/badge/chapters-3-blue?style=for-the-badge)](#-learning-path)
+[![Chapters](https://img.shields.io/badge/chapters-4-blue?style=for-the-badge)](#-learning-path)
 [![Skills](https://img.shields.io/badge/agent_skills-4-8A2BE2?style=for-the-badge)](#-agent-skills)
 [![Frameworks](https://img.shields.io/badge/test_frameworks-2-2EAD33?style=for-the-badge)](#-test-automation-frameworks)
 [![Status](https://img.shields.io/badge/status-in_progress-orange?style=for-the-badge)](#-roadmap)
@@ -38,12 +38,14 @@
 4. [Quick start](#-quick-start)
 5. [Chapter 00 — Agent Skills](#-chapter-00--agent-skills)
 6. [Chapter 02 — Prompt engineering with RICE-POT](#-chapter-02--prompt-engineering-with-rice-pot)
-7. [Test automation frameworks](#-test-automation-frameworks)
-8. [Agent skills](#-agent-skills)
-9. [Key lessons](#-key-lessons)
-10. [Security practices](#-security-practices)
-11. [Roadmap](#-roadmap)
-12. [Author and license](#-author-and-license)
+7. [Anti-hallucination rules](#-anti-hallucination-rules)
+8. [Test automation frameworks](#-test-automation-frameworks)
+9. [Chapter 03 — Prompt engineering for QA](#-chapter-03--prompt-engineering-for-qa)
+10. [Agent skills](#-agent-skills)
+11. [Key lessons](#-key-lessons)
+12. [Security practices](#-security-practices)
+13. [Roadmap](#-roadmap)
+14. [Author and license](#-author-and-license)
 
 </details>
 
@@ -89,13 +91,15 @@ flowchart LR
     C0["📦 Chapter 00<br/><b>Agent Skills</b><br/>Reusable QA instructions"]
     C1["🤖 Chapter 01<br/><b>LLM Basics</b><br/>How models work"]
     C2["✍️ Chapter 02<br/><b>Prompt Engineering</b><br/>RICE-POT → test code"]
+    C3["⭐ Chapter 03<br/><b>Prompt Engineering for QA</b><br/>STAR pattern"]
     OUT["🧪 Verified<br/>test automation"]
 
-    C0 --> C1 --> C2 --> OUT
+    C0 --> C1 --> C2 --> C3 --> OUT
 
     style C0 fill:#e8f5e9,stroke:#2e7d32
     style C1 fill:#eceff1,stroke:#607d8b,stroke-dasharray: 5 5
     style C2 fill:#e3f2fd,stroke:#1565c0
+    style C3 fill:#fffde7,stroke:#f9a825
     style OUT fill:#fff3e0,stroke:#ef6c00
 ```
 
@@ -103,7 +107,8 @@ flowchart LR
 |:-:|---|---|:-:|
 | 00 | [Skill basics](Chapter_00_SKILL_Basics/) | Basic and advanced Agent Skills, a Jira integration, a sample test plan | 🟢 In progress |
 | 01 | LLM basics | — | ⚪ Planned |
-| 02 | [Prompt engineering](Chapter_02_Prompt_Engineering/) | RICE-POT templates and two AI-generated test frameworks | 🟢 In progress |
+| 02 | [Prompt engineering](Chapter_02_Prompt_Engineering/) | RICE-POT templates, anti-hallucination rules, two AI-generated test frameworks | 🟢 In progress |
+| 03 | [Prompt engineering for QA](Chapter_03_Prompt_Engineering_QA/) | STAR prompt for the Wingify login | 🟡 Started |
 
 ---
 
@@ -135,8 +140,12 @@ AITesterBlueprint5X/
 │       │   ├── Template.RICEPPOT.md         Blank RICE-POT template
 │       │   └── Playwirght.RICEPOT.md        Prompt: Wingify login, Playwright
 │       ├── REALPROMPT_RICE_POT.md           Prompt: Salesforce login, Selenium
+│       ├── anti-hallucination.rules.md      Verification rules for any QA prompt
 │       ├── 📂 SeleniumFramework/            Java · Selenium · TestNG · Allure
 │       └── 📂 PlaywrightFramework/          TypeScript · Playwright · Allure
+│
+├── 📂 Chapter_03_Prompt_Engineering_QA/
+│   └── STAR.md                              STAR prompt: Wingify login (draft)
 │
 └── 📂 learnings/                            Short write-ups of problems solved
 ```
@@ -304,6 +313,58 @@ flowchart TD
 
 ---
 
+## 🛡️ Anti-hallucination rules
+
+[`anti-hallucination.rules.md`](Chapter_02_Prompt_Engineering/RICE_POT/anti-hallucination.rules.md) is a reusable rule set you can add to any QA prompt. It limits the AI to the material you provide: PRD, API documentation, logs, screenshots, test data, and user input.
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### 🚫 Strict rules
+1. Never invent features, APIs, error codes, UI elements, or behaviour.
+2. Never assume "typical" system behaviour.
+3. When information is missing, answer *"Insufficient information to determine."*
+4. Every assertion must trace back to the input.
+5. Label inferred details *"Inference (low confidence)"*.
+6. Output must be deterministic and repeatable.
+
+</td>
+<td width="50%" valign="top">
+
+### 🔁 Required process
+```mermaid
+flowchart TD
+    S1["1️⃣ Extract verifiable facts"] --> S2["2️⃣ List unknown or missing information"]
+    S2 --> S3["3️⃣ Generate output from facts only"]
+    S3 --> S4["4️⃣ Self-check for hallucinations"]
+```
+
+</td>
+</tr>
+</table>
+
+<details>
+<summary><b>📋 Required output format</b></summary>
+
+Every answer must contain these four sections, in order:
+
+| Section | Contains |
+|---|---|
+| **Verified Facts** | What the input actually states |
+| **Missing / Unknown Information** | Gaps the author must fill |
+| **Generated Output** | The deliverable, built only from verified facts |
+| **Self-Validation Check** | The AI's own check for invented or contradictory content |
+
+If any step cannot be completed, the AI must stop and say why.
+
+</details>
+
+> [!TIP]
+> Both frameworks in this chapter follow these rules: missing credentials make a test **skip** instead of pass, and inferred checks are labelled in the report.
+
+---
+
 ## 🧪 Test automation frameworks
 
 Both frameworks were generated from RICE-POT prompts, then run and corrected against the live sites.
@@ -424,6 +485,22 @@ The prompts described simple one-step forms. Running against the real sites reve
 
 ---
 
+## ⭐ Chapter 03 — Prompt engineering for QA
+
+This chapter explores the **STAR** prompt pattern for QA work, starting with the Wingify login page.
+
+| Letter | Section | Purpose |
+|:-:|---|---|
+| **S** | Situation | Who you are and what you are testing |
+| **T** | Task | What the AI must produce |
+| **A** | Action | The steps the AI must follow |
+| **R** | Result | What the finished output must look like |
+
+> [!NOTE]
+> 🚧 **Work in progress.** [`STAR.md`](Chapter_03_Prompt_Engineering_QA/STAR.md) currently contains the start of the Situation section only.
+
+---
+
 ## 🧰 Agent skills
 
 | Skill | Purpose | Status |
@@ -514,11 +591,18 @@ When credentials or behaviour are unknown, tests **skip** with *"Insufficient in
 
 **Chapter 02 — Prompt engineering**
 - [x] RICE-POT template
+- [x] Anti-hallucination rule set
+- [ ] Fill in the author details in `anti-hallucination.rules.md`
 - [x] Selenium framework for Salesforce login
 - [x] Playwright framework for Wingify login
 - [ ] Run both real-login tests with real accounts
 - [ ] Stop Allure from recording passwords in the Selenium framework
 - [ ] Add a CI pipeline (GitHub Actions) that publishes the reports
+
+**Chapter 03 — Prompt engineering for QA**
+- [x] Start the STAR prompt for the Wingify login
+- [ ] Complete the Situation, Task, Action, and Result sections
+- [ ] Compare STAR output with the RICE-POT output for the same page
 
 ---
 
