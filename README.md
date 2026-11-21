@@ -91,7 +91,7 @@ flowchart LR
     C0["📦 Chapter 00<br/><b>Agent Skills</b><br/>Reusable QA instructions"]
     C1["🤖 Chapter 01<br/><b>LLM Basics</b><br/>How models work"]
     C2["✍️ Chapter 02<br/><b>Prompt Engineering</b><br/>RICE-POT → test code"]
-    C3["⭐ Chapter 03<br/><b>Prompt Engineering for QA</b><br/>STAR pattern"]
+    C3["⭐ Chapter 03<br/><b>Prompt Engineering for QA</b><br/>STAR · CLEAR → QA documents"]
     OUT["🧪 Verified<br/>test automation"]
 
     C0 --> C1 --> C2 --> C3 --> OUT
@@ -108,7 +108,7 @@ flowchart LR
 | 00 | [Skill basics](Chapter_00_SKILL_Basics/) | Basic and advanced Agent Skills, a Jira integration, a sample test plan | 🟢 In progress |
 | 01 | LLM basics | — | ⚪ Planned |
 | 02 | [Prompt engineering](Chapter_02_Prompt_Engineering/) | RICE-POT templates, anti-hallucination rules, two AI-generated test frameworks | 🟢 In progress |
-| 03 | [Prompt engineering for QA](Chapter_03_Prompt_Engineering_QA/) | STAR prompt for the Wingify login | 🟡 Started |
+| 03 | [Prompt engineering for QA](Chapter_03_Prompt_Engineering_QA/) | STAR and CLEAR prompts, a test plan and 10 test cases for the Wingify login | 🟢 In progress |
 
 ---
 
@@ -145,7 +145,12 @@ AITesterBlueprint5X/
 │       └── 📂 PlaywrightFramework/          TypeScript · Playwright · Allure
 │
 ├── 📂 Chapter_03_Prompt_Engineering_QA/
-│   └── STAR.md                              STAR prompt: Wingify login (draft)
+│   ├── STAR.md                              STAR prompt → functional test plan
+│   ├── CLEAR.md                             CLEAR prompt → 10 test cases
+│   ├── CRISP.md                             CRISP prompt (planned)
+│   └── 📂 output/                           Generated documents (Word + PDF)
+│       ├── Wingify_Login_Test_Plan.docx / .pdf
+│       └── Wingify_Login_Test_Cases.docx / .pdf
 │
 └── 📂 learnings/                            Short write-ups of problems solved
 ```
@@ -487,17 +492,113 @@ The prompts described simple one-step forms. Running against the real sites reve
 
 ## ⭐ Chapter 03 — Prompt engineering for QA
 
-This chapter explores the **STAR** prompt pattern for QA work, starting with the Wingify login page.
+This chapter uses structured prompt patterns to produce **review-ready QA documents**. Both prompts work from the same five approved requirements for the [Wingify login](https://app.wingify.com/#/login), so their outputs fit together: the test plan defines the approach, and the test cases carry it out.
 
-| Letter | Section | Purpose |
+```mermaid
+flowchart LR
+    R["📋 5 approved<br/>requirements"] --> S["⭐ STAR prompt"]
+    R --> C["✨ CLEAR prompt"]
+    S --> TP["📘 Test plan<br/>14 scenarios · 10 open questions"]
+    C --> TC["📗 Test cases<br/>10 cases · all Not Run"]
+    TP --> H{"👤 Human review"}
+    TC --> H
+
+    style R fill:#eceff1,stroke:#607d8b
+    style TP fill:#e3f2fd,stroke:#1565c0
+    style TC fill:#e8f5e9,stroke:#2e7d32
+    style H fill:#fff3e0,stroke:#ef6c00
+```
+
+<table>
+<tr>
+<th width="50%">⭐ STAR → Test plan</th>
+<th width="50%">✨ CLEAR → Test cases</th>
+</tr>
+<tr>
+<td valign="top">
+
+| | Section | Purpose |
 |:-:|---|---|
-| **S** | Situation | Who you are and what you are testing |
-| **T** | Task | What the AI must produce |
-| **A** | Action | The steps the AI must follow |
-| **R** | Result | What the finished output must look like |
+| **S** | Situation | Who you are and the approved requirements |
+| **T** | Task | What to produce, and which template to follow |
+| **A** | Action | What to cover and what never to invent |
+| **R** | Result | The exact sections the output must contain |
+
+**Prompt:** [`STAR.md`](Chapter_03_Prompt_Engineering_QA/STAR.md)
+
+</td>
+<td valign="top">
+
+| | Section | Purpose |
+|:-:|---|---|
+| **C** | Context | Who you are and the approved requirements |
+| **L** | Limits | Hard rules: count, placeholders, status |
+| **E** | Examples | One test case in the required format |
+| **A** | Action | What to cover and how to write it |
+| **R** | Review | Checks the output must pass |
+
+**Prompt:** [`CLEAR.md`](Chapter_03_Prompt_Engineering_QA/CLEAR.md)
+
+</td>
+</tr>
+<tr>
+<td valign="top">
+
+**Output:** [Word](Chapter_03_Prompt_Engineering_QA/output/Wingify_Login_Test_Plan.docx) · [PDF](Chapter_03_Prompt_Engineering_QA/output/Wingify_Login_Test_Plan.pdf) – 10 pages
+
+- 14 scenarios: 2 positive, 8 negative, 4 boundary
+- In-scope and out-of-scope tables
+- Test data, entry and exit criteria, deliverables
+- Risks, plus 10 open questions with an answer column
+
+</td>
+<td valign="top">
+
+**Output:** [Word](Chapter_03_Prompt_Engineering_QA/output/Wingify_Login_Test_Cases.docx) · [PDF](Chapter_03_Prompt_Engineering_QA/output/Wingify_Login_Test_Cases.pdf) – 9 pages
+
+- 10 test cases, every one marked **Not Run**
+- Valid login, wrong password, unregistered email, empty fields, access control
+- Placeholders only, such as `<Registered_Email>`
+- Traceability table and a reviewer checklist
+
+</td>
+</tr>
+</table>
+
+<details>
+<summary><b>🛡️ How the outputs stay honest</b></summary>
+
+Both prompts forbid inventing behaviour, so the documents use two labels:
+
+| Label | Meaning | Examples |
+|---|---|---|
+| **Requires Clarification** | The requirements do not say; a person must answer before execution | Message for empty fields, dashboard URL, length limits |
+| **Recommendation** | Proposed by QA, not an approved requirement | Priorities, entry and exit criteria, browsers, tools |
+
+The only error message used anywhere is the one supplied in the requirements: *"Your email, password, IP address or location did not match"*.
+
+</details>
+
+<details>
+<summary><b>📋 The 10 test cases at a glance</b></summary>
+
+| ID | Test case | Type |
+|---|---|---|
+| TC-001 | Valid registered credentials open the dashboard | Positive |
+| TC-002 | Registered email with an incorrect password | Negative |
+| TC-003 | Unregistered email | Negative |
+| TC-004 | Email of one account with another account's password | Negative |
+| TC-005 | Empty email | Negative |
+| TC-006 | Empty password | Negative |
+| TC-007 | Both fields empty | Negative |
+| TC-008 | Dashboard blocked before login | Access control |
+| TC-009 | Dashboard blocked after a failed login | Access control |
+| TC-010 | Dashboard accessible after a successful login | Access control |
+
+</details>
 
 > [!NOTE]
-> 🚧 **Work in progress.** [`STAR.md`](Chapter_03_Prompt_Engineering_QA/STAR.md) currently contains the start of the Situation section only.
+> 📝 Both documents are **drafts for review**. Fill in the open questions and the names and dates marked *Requires Clarification* before using them. [`CRISP.md`](Chapter_03_Prompt_Engineering_QA/CRISP.md) is reserved for the next prompt pattern.
 
 ---
 
@@ -600,9 +701,11 @@ When credentials or behaviour are unknown, tests **skip** with *"Insufficient in
 - [ ] Add a CI pipeline (GitHub Actions) that publishes the reports
 
 **Chapter 03 — Prompt engineering for QA**
-- [x] Start the STAR prompt for the Wingify login
-- [ ] Complete the Situation, Task, Action, and Result sections
-- [ ] Compare STAR output with the RICE-POT output for the same page
+- [x] STAR prompt → functional test plan (Word + PDF)
+- [x] CLEAR prompt → 10 test cases (Word + PDF)
+- [ ] Answer the open questions and finalise both documents
+- [ ] Write the CRISP prompt
+- [ ] Compare the outputs of STAR, CLEAR, and CRISP for the same login page
 
 ---
 
