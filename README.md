@@ -108,7 +108,7 @@ flowchart LR
 | 00 | [Skill basics](Chapter_00_SKILL_Basics/) | Basic and advanced Agent Skills, a Jira integration, a sample test plan | 🟢 In progress |
 | 01 | LLM basics | — | ⚪ Planned |
 | 02 | [Prompt engineering](Chapter_02_Prompt_Engineering/) | RICE-POT templates, anti-hallucination rules, two AI-generated test frameworks | 🟢 In progress |
-| 03 | [Prompt engineering for QA](Chapter_03_Prompt_Engineering_QA/) | STAR and CLEAR prompts, a test plan and 10 test cases for the Wingify login | 🟢 In progress |
+| 03 | [Prompt engineering for QA](Chapter_03_Prompt_Engineering_QA/) | STAR and CLEAR prompts, a test plan and 10 test cases for the Wingify login, plus a reusable prompt kit (4 context files, 6 templates) | 🟢 In progress |
 
 ---
 
@@ -145,6 +145,18 @@ AITesterBlueprint5X/
 │       └── 📂 PlaywrightFramework/          TypeScript · Playwright · Allure
 │
 ├── 📂 Chapter_03_Prompt_Engineering_QA/
+│   ├── 📂 00_context-vwo/                   Fill-in context files (write once, reuse)
+│   │   ├── context_project.md               Application, tech stack, environments
+│   │   ├── context_feature.md               User stories, criteria, APIs, validations
+│   │   ├── context_testing.md               Scope, test data, environment, dependencies
+│   │   └── context_constraints.md           Anti-hallucination rules and output rules
+│   ├── 📂 01_reuse-templates/               Six ready-to-use prompt templates
+│   │   ├── Template1_Basic_TC_Gen.md
+│   │   ├── Template2_PRD_TC_Comprehensive.md
+│   │   ├── Template3_APITest_Gen.md
+│   │   ├── Template4_Negative_TC.md
+│   │   ├── Template5_Security_TC.md
+│   │   └── Template6_Regression_Test_Suite.md
 │   ├── STAR.md                              STAR prompt → functional test plan
 │   ├── CLEAR.md                             CLEAR prompt → 10 test cases
 │   ├── CRISP.md                             CRISP prompt (planned)
@@ -600,6 +612,84 @@ The only error message used anywhere is the one supplied in the requirements: *"
 > [!NOTE]
 > 📝 Both documents are **drafts for review**. Fill in the open questions and the names and dates marked *Requires Clarification* before using them. [`CRISP.md`](Chapter_03_Prompt_Engineering_QA/CRISP.md) is reserved for the next prompt pattern.
 
+### 🧰 Reusable prompt kit
+
+Writing a full prompt from scratch for every task is slow and inconsistent. The kit splits a prompt into two reusable parts:
+
+- **Context files** describe *your* project. You fill them in once.
+- **Templates** describe *the task*. You pick the one that fits.
+
+Combine one template with the context files, and every prompt starts from the same verified facts and the same rules.
+
+```mermaid
+flowchart LR
+    subgraph CTX["📂 00_context-vwo — fill in once"]
+        P[context_project]
+        F[context_feature]
+        T[context_testing]
+        C[context_constraints]
+    end
+    subgraph TPL["📂 01_reuse-templates — pick one"]
+        T1[Basic]
+        T2[PRD]
+        T3[API]
+        T4[Negative]
+        T5[Security]
+        T6[Regression]
+    end
+    CTX --> PR["✍️ Complete prompt"]
+    TPL --> PR
+    PR --> AI["🤖 AI assistant"]
+    AI --> OUT["📋 Test cases / suite"]
+    OUT --> H{"👤 Human review"}
+
+    style CTX fill:#eceff1,stroke:#607d8b
+    style TPL fill:#e3f2fd,stroke:#1565c0
+    style OUT fill:#e8f5e9,stroke:#2e7d32
+    style H fill:#fff3e0,stroke:#ef6c00
+```
+
+<details>
+<summary><b>📂 Context files — what each one holds</b></summary>
+
+| File | Fill in | Why it matters |
+|---|---|---|
+| [`context_project.md`](Chapter_03_Prompt_Engineering_QA/00_context-vwo/context_project.md) | Application name, type, domain, tech stack, Dev / Staging / Prod URLs, key constraints | The AI knows *what* system it is testing |
+| [`context_feature.md`](Chapter_03_Prompt_Engineering_QA/00_context-vwo/context_feature.md) | Overview, user stories, acceptance criteria, API endpoints, UI elements, validation rules, error messages | The only source of truth for expected behaviour |
+| [`context_testing.md`](Chapter_03_Prompt_Engineering_QA/00_context-vwo/context_testing.md) | In and out of scope, test data, browsers and devices, dependencies, known issues | Keeps output inside the agreed scope |
+| [`context_constraints.md`](Chapter_03_Prompt_Engineering_QA/00_context-vwo/context_constraints.md) | Ready to use: MUST / MUST NOT rules and output rules | Stops invented messages, endpoints, and validation rules; marks gaps as `[NEEDS CLARIFICATION]` and guesses as `[ASSUMPTION]` |
+
+</details>
+
+<details>
+<summary><b>📑 Templates — pick the one that fits the task</b></summary>
+
+| # | Template | Use it when you need | Output columns |
+|:-:|---|---|---|
+| 1 | [Basic test cases](Chapter_03_Prompt_Engineering_QA/01_reuse-templates/Template1_Basic_TC_Gen.md) | A set number of test cases for one feature | Test ID · Description · Pre-conditions · Steps · Expected Result · Priority |
+| 2 | [PRD → comprehensive](Chapter_03_Prompt_Engineering_QA/01_reuse-templates/Template2_PRD_TC_Comprehensive.md) | Full coverage from a PRD, SRS, BRD, Jira ticket, or Confluence page | TID · Category · Description · Pre-conditions · Steps · Expected · Priority |
+| 3 | [API tests](Chapter_03_Prompt_Engineering_QA/01_reuse-templates/Template3_APITest_Gen.md) | Endpoint tests from API documentation | Test ID · Endpoint · Method · Request Body · Expected Status · Expected Response |
+| 4 | [Negative only](Chapter_03_Prompt_Engineering_QA/01_reuse-templates/Template4_Negative_TC.md) | Invalid input, boundary, missing-field, and unauthorised cases | Test ID · Invalid Scenario · Input · Expected Error |
+| 5 | [Security](Chapter_03_Prompt_Engineering_QA/01_reuse-templates/Template5_Security_TC.md) | OWASP-style checks, without real attack payloads | Test ID · Security Risk · Attack Vector · Expected Secure Behavior |
+| 6 | [Regression suite](Chapter_03_Prompt_Engineering_QA/01_reuse-templates/Template6_Regression_Test_Suite.md) | End-to-end regression with data setup and time estimates | Test ID · Scenario · Data Setup · Steps · Est. Time · Priority |
+
+Every template repeats the same core guardrail: **use only the material provided and do not assume undocumented behaviour.**
+
+</details>
+
+<details>
+<summary><b>▶️ How to use the kit in four steps</b></summary>
+
+1. **Fill in the context files** for your project. Leave `context_constraints.md` as it is unless your team has extra rules.
+2. **Pick a template** from the table above.
+3. **Build the prompt:** paste the template, then paste the four context files below it, and replace the template's `[PASTE … HERE]` block with your requirements or API docs.
+4. **Review the output:** resolve every `[NEEDS CLARIFICATION]` and check every `[ASSUMPTION]` before using the test cases.
+
+</details>
+
+> [!TIP]
+> The context files ship as **blank templates**. Fill them in for one application (for example VWO / Wingify) and keep that copy, so every later prompt reuses the same verified facts.
+
 ---
 
 ## 🧰 Agent skills
@@ -703,6 +793,9 @@ When credentials or behaviour are unknown, tests **skip** with *"Insufficient in
 **Chapter 03 — Prompt engineering for QA**
 - [x] STAR prompt → functional test plan (Word + PDF)
 - [x] CLEAR prompt → 10 test cases (Word + PDF)
+- [x] Reusable prompt kit: 4 context files and 6 task templates
+- [ ] Fill in the context files for VWO / Wingify
+- [ ] Run each template against the filled-in context and save the outputs
 - [ ] Answer the open questions and finalise both documents
 - [ ] Write the CRISP prompt
 - [ ] Compare the outputs of STAR, CLEAR, and CRISP for the same login page
